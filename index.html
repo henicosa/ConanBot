@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Kalender</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/ical.js"></script>
+</head>
+<body>
+    <div id="calendar"></div>
+    <script>
+        var ical = new ICAL.ICalExpander();
+        ical.expandURL("mr-kalender.ics", function(calendar) {
+            // calendar is an ICAL.Component object
+            var events = calendar.getAllSubcomponents("vevent");
+            console.log(events);
+        });    
+    </script>
+</body>
+</html>
