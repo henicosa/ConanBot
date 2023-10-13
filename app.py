@@ -18,6 +18,8 @@ secrets = read_json("secrets/secrets.json")
 settings = read_json("application.json")
 program_status = "not running"
 
+autostart = settings['autostart']
+
 app.config['BASIC_AUTH_USERNAME'] = secrets['username']
 app.config['BASIC_AUTH_PASSWORD'] = secrets['password']
 
@@ -31,12 +33,27 @@ Section for App-specific functions
 -----------------------------------------------------
 '''
 
+@app.route('/calendar/view/<calendar>')
+def return_calendar_view(calendar):
+    return render_template('calendar.html',  calendar_url="/calendar/subscribe/" + calendar)
+
+@app.route('/calendar/subscribe/<calendar>')
+def return_calendar_subscription(calendar):
+    with open('app/' + calendar + '.ics', 'r') as f:
+        ics_file = f.read()
+    return Response(ics_file, mimetype='text/calendar')
+
+
 @app.route('/conan-calendar.ics')
 def conan_calendar_ics():
     with open('app/conan-calendar.ics', 'r') as f:
         ics_file = f.read()
     return Response(ics_file, mimetype='text/calendar')
 
+import caldove
+@app.route('/calendar/api/caldove')
+def caldove_route():
+    return caldove.generate_site()
 
 @app.route('/conan-calendar')
 def conan_calendar():
@@ -109,11 +126,13 @@ def activate():
 
 
 def start():
+    global program_status
     time.sleep(5)
 
     # code for app-specific function goes here
     subprocess.Popen(["python", "app/main.py"]) 
     print("Calendar initialized")
+    program_status = "success"
 
     return True
 
@@ -121,3 +140,6 @@ def start():
 if __name__ == '__main__':
     print(settings["autostart"])
     app.run()
+
+if settings["autostart"]:
+    start()

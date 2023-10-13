@@ -155,7 +155,37 @@ def get_two_week_boundaries(week_of_interest, timezone='Europe/Berlin'):
     week_offset = timedelta(days = (week_number-1)*7)
     start_of_period = first_day_of_period + week_offset
     end_of_period = first_day_of_period + week_offset + timedelta(days=14)
-    return tz.localize(datetime.datetime.now()), end_of_period
+    return start_of_period, end_of_period
+
+
+def generate_joint_calendar(ical_links, calendar_name, filename):
+    timezone = pytz.timezone("Europe/Berlin")
+    now = datetime.datetime.now(timezone)
+    week_of_interest = now.isocalendar()[:2]
+
+    start_of_period, end_of_period = get_two_week_boundaries(week_of_interest)
+
+    # fetch and parse events from each link
+    events = []
+    vtimezones = []
+
+    for link in ical_links:
+        try:
+            response = requests.get(link)
+            cal = icalendar.Calendar.from_ical(response.text)
+        except:
+            applog.error("Could not parse calendar: " +  link)
+            continue
+        # start with recurring events
+        other_calendar_name = cal["X-WR-CALNAME"]
+        calendar_events = recurring_ical_events.of(cal, components=["VEVENT"]).between(start_of_period, end_of_period)
+        calendar_events = [icaltools.prepend_description(event, other_calendar_name) for event in calendar_events]
+        calendar_events = [icaltools.prepend_category(event, other_calendar_name) for event in calendar_events]
+        events += calendar_events
+        vtimezones += [c for c in cal.subcomponents if c.name == 'VTIMEZONE']
+
+    #events = icaltools.localize_aware_events(events)
+    export_calendar(filename + ".ics", generate_new_icalendar(calendar_name, vtimezones, events))
 
 
 def generate_free_time_calendar(ical_links):
@@ -238,6 +268,10 @@ def parse_file(filepath):
                     links.append(match.group())
     links = [link.replace("webcal", "https") if link.startswith("webcal") else link for link in links]
     return links
+
+def write_ludwig_calendar():
+    calendar_links = parse_file("ludwig_links.txt")
+    generate_joint_calendar(calendar_links, "Ludwigs kombinierter Kalender", "ludwigskombilender")
 
 def write_calendar():
     calendar_links = parse_file("links.txt")

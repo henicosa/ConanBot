@@ -10,6 +10,20 @@ from icalendar import Timezone as ical_Timezone
 import uuid
 from icalendar import Event, vDatetime, TimezoneStandard, TimezoneDaylight
 
+def prepend_description(event, text):
+    if 'DESCRIPTION' in event:
+        event['DESCRIPTION'] = text + " \n\n " + event["DESCRIPTION"]
+    else:
+        event['DESCRIPTION'] = text
+    return event
+
+def prepend_category(event, text):
+    if 'CATEGORIES' in event:
+        event['CATEGORIES'] = text + "," + event["CATEGORIES"]
+    else:
+        event['CATEGORIES'] = text
+    return event
+
 def exclude_fullday_events(events):
     filtered_events = []
     for event in events:
@@ -43,7 +57,32 @@ def filter_by_summary_keyword(events, keyword):
     """
     filtered_events = list(filter(lambda event: (keyword.lower() in event['SUMMARY'].lower()) if 'SUMMARY' in event else False, events))
     return filtered_events
-    
+
+def create_ical_events_from_timespans(free_times, summary):
+    """
+    This function takes a list of timespans and returns a list of iCalendar events.
+    Each iCalendar event will have the summary "Möglicher Termin" and dtstart and dtend 
+    will be set to the start and end of each timespan respectively.
+    """    
+    # Create an empty list to store the iCalendar events
+    ical_events = []
+    # Iterate over the free times
+    for start, end in free_times:
+        # Create a new iCalendar event
+        ical_event = new_event()
+        # Set the summary of the event
+        ical_event.add('summary', summary)
+        # Set the start time of the event
+        ical_event.add('dtstart', vDatetime(start))
+        # Set the end time of the event
+        ical_event.add('dtend', vDatetime(end))
+        ical_event.add('color', '#FFC0CB')
+        ical_event.add('transp', 'TRANSPARENT')
+        # Append the event to the list of iCalendar events
+        ical_events.append(ical_event)
+    # Return the list of iCalendar events
+    return ical_events
+
 def new_event():
     event = Event()
     # Get the current date and time in UTC
@@ -259,3 +298,18 @@ def create_non_recurring_events(recurring_event, occurrences, timezone='UTC'):
         non_recurring_events.append(non_recurring_event)
     # Return the list of non-recurring events
     return non_recurring_events
+
+# unite events_a and events_b so that multiple events with the same start time, end time and summary are not duplicated
+def unite_events(events_a, events_b):
+    events_a = sorted(events_a, key=lambda x: (x['DTSTART'].dt))
+    events_b = sorted(events_b, key=lambda x: (x['DTSTART'].dt))
+    for event in events_b:
+        is_duplicate = False
+        for event_a in events_a:
+            if event_a['DTSTART'].dt == event['DTSTART'].dt and event_a['DTEND'].dt == event['DTEND'].dt and event_a['SUMMARY'] == event['SUMMARY']:
+                is_duplicate = True
+                break
+        if not is_duplicate:
+            events_a.append(event)
+    return events_a
+        
