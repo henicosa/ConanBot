@@ -5,10 +5,15 @@ from icalendar import Calendar, Event, vDatetime
 import os
 
 import icaltools
+import conanbot
 
 def get_rss_items(url):
     feed = feedparser.parse(url)
     return feed.entries
+
+def generate_mr_compare_calendar():
+    ical_links = ["https://cloud.bau-ha.us/remote.php/dav/public-calendars/aQZoW4z6d8o8g7M4?export", "https://time.ludattel.de/calendar/subscribe/mrkalender"]
+    conanbot.generate_joint_calendar(ical_links, "Kombinierter MR Kalender", "mrcompare")
 
 
 def generate_mr_calendar():
@@ -47,6 +52,7 @@ def generate_mr_calendar():
     cal = Calendar()
     cal.add('prodid', '-//MR Usage Calendar//m18.uni-weimar.de//')
     cal.add('version', '2.0')
+    cal.add('X-COLOR', '#FFC0CB')
     cal.add('timezone', {'tzid': 'UTC'})
     for event in events:
         cal.add_component(event)

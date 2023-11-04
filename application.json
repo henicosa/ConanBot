@@ -5,5 +5,5 @@
     "application_introduction": "ConanBot stellt einen Webkalender unter der Adresse time.ludattel.de/conan-calendar.ics bereit. In dem Kalender werden alle Termine angezeigt, an denen sowohl Olli, Linda als auch Agnes Zeit für einen Detektiv Conan Abend haben.",
     "application_repo_link": "https://github.com/henicosa",
     "application_version": "1.0",
-    "autostart": true
+    "autostart_enabled": true
 }

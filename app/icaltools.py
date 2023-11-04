@@ -10,6 +10,11 @@ from icalendar import Timezone as ical_Timezone
 import uuid
 from icalendar import Event, vDatetime, TimezoneStandard, TimezoneDaylight
 
+
+def add_property(event, property, value):
+    event[property] = value;
+    return event
+
 def prepend_description(event, text):
     if 'DESCRIPTION' in event:
         event['DESCRIPTION'] = text + " \n\n " + event["DESCRIPTION"]

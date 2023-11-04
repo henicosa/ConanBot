@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+    <meta name="author" content="Ludwig Lorenz (ludwig.david.lorenz@uni-weimar.de)" />
+    <title>{{  appinfo.application_name  }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styling.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='landing_page.css') }}" />
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+    <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+    <link rel="stylesheet" href="https://fonts.bunny.net/css?family=hepta-slab:400,700|montserrat:400,400i,700,700i">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vollkorn:wght@800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <h1 class="logo">{{  error.code  }}</h1>
+
+
+    <div class="wrap">
+
+          <p>{{  error.explanation_de  }}</p>
+        
+          <p class="english">{{  error.explanation_en  }}</p>
+
+     </div>
+  
+</body>
+
+</html>

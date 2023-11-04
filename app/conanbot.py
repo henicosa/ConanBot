@@ -13,6 +13,7 @@ import schedule
 import re
 import time
 import applog
+import json
 
 def invert_events(events, start, end):
     free_times = find_free_times(events, start, end)
@@ -157,13 +158,17 @@ def get_two_week_boundaries(week_of_interest, timezone='Europe/Berlin'):
     end_of_period = first_day_of_period + week_offset + timedelta(days=14)
     return start_of_period, end_of_period
 
+def get_two_months_boundaries(now, timezone='Europe/Berlin'):
+    week_offset = timedelta(days = (8)*7)
+    start_of_period = now - week_offset
+    end_of_period = now + timedelta(days=(8)*7)
+    return start_of_period, end_of_period
+
 
 def generate_joint_calendar(ical_links, calendar_name, filename):
     timezone = pytz.timezone("Europe/Berlin")
-    now = datetime.datetime.now(timezone)
-    week_of_interest = now.isocalendar()[:2]
 
-    start_of_period, end_of_period = get_two_week_boundaries(week_of_interest)
+    start_of_period, end_of_period = get_two_months_boundaries(now = datetime.datetime.now(timezone))
 
     # fetch and parse events from each link
     events = []
@@ -176,16 +181,31 @@ def generate_joint_calendar(ical_links, calendar_name, filename):
         except:
             applog.error("Could not parse calendar: " +  link)
             continue
+
+        try:
+            calendar_color = cal["X-APPLE-CALENDAR-COLOR"]
+        except:
+            try:
+                calendar_color = cal["X-COLOR"]
+            except:
+                calendar_color = "#9999ff"
+
         # start with recurring events
-        other_calendar_name = cal["X-WR-CALNAME"]
+        try:
+            other_calendar_name = cal["X-WR-CALNAME"]
+        except:
+            other_calendar_name = "Unnamed Calendar"
         calendar_events = recurring_ical_events.of(cal, components=["VEVENT"]).between(start_of_period, end_of_period)
         calendar_events = [icaltools.prepend_description(event, other_calendar_name) for event in calendar_events]
         calendar_events = [icaltools.prepend_category(event, other_calendar_name) for event in calendar_events]
+        calendar_events = [icaltools.add_property(event, "COLOR", calendar_color) for event in calendar_events]
         events += calendar_events
         vtimezones += [c for c in cal.subcomponents if c.name == 'VTIMEZONE']
 
+    new_calendar = generate_new_icalendar(calendar_name, vtimezones, events)
     #events = icaltools.localize_aware_events(events)
-    export_calendar(filename + ".ics", generate_new_icalendar(calendar_name, vtimezones, events))
+    export_calendar(filename + ".ics", new_calendar)
+    export_calendar_as_json(filename + ".json", events)
 
 
 def generate_free_time_calendar(ical_links):
@@ -281,3 +301,17 @@ def write_calendar():
 def export_calendar(filename, icalendar):
     with open(filename, 'wb') as f:
         f.write(icalendar.to_ical())
+
+def export_calendar_as_json(filename, ical_events):
+    events = []
+    for ical_event in ical_events:
+        event = {}
+        event["id"] = ical_event.get("UID")
+        event["title"] = ical_event.get("SUMMARY")
+        event["start"] = str(ical_event.get('dtstart').dt)
+        event["end"] = str(ical_event.get('dtend').dt)
+        event["color"] = ical_event.get("COLOR")
+        events.append(event)
+
+    with open(filename, 'w') as f:
+        f.write(json.dumps(events))

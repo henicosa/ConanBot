@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script type='importmap'>
+      {
+        "imports": {
+          "@fullcalendar/core": "https://cdn.skypack.dev/@fullcalendar/core@6.1.4",
+          "@fullcalendar/daygrid": "https://cdn.skypack.dev/@fullcalendar/daygrid@6.1.4",
+          "@fullcalendar/timegrid": "https://cdn.skypack.dev/@fullcalendar/timegrid@6.1.4"
+        }
+      }
+    </script>
+    <script type='module'>
+      import { Calendar } from '@fullcalendar/core'
+      import dayGridPlugin from '@fullcalendar/daygrid'
+      import timeGridPlugin from '@fullcalendar/timegrid'
+      //import deLocale from '@fullcalendar/core/locales/de';
+      //import enLocale from '@fullcalendar/core/locales/en-gb';
+      const getJSON = async url => {
+        const response = await fetch(url);
+        if(!response.ok) // check if response worked (no 404 errors etc...)
+          throw new Error(response.statusText);
+
+        const data = response.json(); // get JSON from the response
+        return data; // returns a promise, which resolves to this data value
+      }
+
+      getJSON("{{ calendar_url }}").then(data => render_calendar(data)).catch(error => render_calendar([]))
+
+      function render_calendar(events) {
+        const calendarEl = document.getElementById('calendar')
+        const calendar = new Calendar(calendarEl, {
+          plugins: [dayGridPlugin, timeGridPlugin],
+          //locales: [ enLocale, deLocale ],
+          locale: 'de', // the initial locale. if not specified, uses the first one
+          headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+          },
+          initialView: 'timeGridWeek',
+            events: events
+        })
+        calendar.render()
+      }
+      
+      document.addEventListener('DOMContentLoaded', [])
+    </script>
+  </head>
+  <body>
+    <div id='calendar'></div>
+  </body>
+</html>

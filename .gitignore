@@ -4,3 +4,4 @@ secrets
 links.txt
 ludwig_links.txt
 app/log
+app/*.json

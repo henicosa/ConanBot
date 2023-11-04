@@ -14,13 +14,16 @@ import applog
 
 
 print("Started scheduling")
-    
+
+mrkalender.generate_mr_compare_calendar()
 conanbot.write_calendar()
 mrkalender.generate_mr_calendar()
 conanbot.write_ludwig_calendar()
+
 schedule.every(5).minutes.do(conanbot.write_ludwig_calendar)
 schedule.every(2).hours.do(conanbot.write_calendar)
 schedule.every(1).hours.do(mrkalender.generate_mr_calendar)
+schedule.every(1).hours.do(mrkalender.generate_mr_compare_calendar)
 
 while True:
     try:
