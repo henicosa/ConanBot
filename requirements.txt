@@ -1,3 +1,4 @@
+Werkzeug==2.3.7
 Flask==2.2.2
 Flask_BasicAuth==0.2.0
 icalendar==5.0.1
