@@ -88,6 +88,7 @@ def conan_calendar():
 
 
 @app.route('/invert-conan-calendar.ics')
+@basic_auth.required
 def invert_conan_calendar_ics():
     with open('app/invert-conan-calendar.ics', 'r') as f:
         ics_file = f.read()
@@ -95,6 +96,7 @@ def invert_conan_calendar_ics():
 
 
 @app.route('/invert-conan-calendar')
+@basic_auth.required
 def invert_conan_calendar():
     return render_template('calendar.html',  calendar_url="invert-conan-calendar.ics")
 
