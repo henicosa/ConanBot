@@ -15,6 +15,12 @@ import applog
 
 print("Started scheduling")
 
+path_to_calendar = "calendars/"
+
+# get all config files
+config_files = [f for f in os.listdir(path_to_calendar) if f.endswith('.config')]
+
+
 mrkalender.generate_mr_compare_calendar()
 conanbot.write_calendar()
 mrkalender.generate_mr_calendar()
